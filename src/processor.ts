@@ -31,7 +31,7 @@ async function processMessage(message: TelegramMessage) {
   const { rows } = await query<{ business_user_id: string; enabled: boolean; can_reply: boolean }>(
     "SELECT business_user_id,enabled,can_reply FROM business_connections WHERE id=$1", [connectionId]);
   const conn = rows[0];
-  if (!conn?.enabled || !conn.can_reply) return void await audit("connection_not_ready", connectionId, message.chat.id);
+  if (!conn?.enabled) return void await audit("connection_not_ready", connectionId, message.chat.id, { enabled: conn?.enabled, canReply: conn?.can_reply });
 
   const isOutgoing = String(senderId) === conn.business_user_id;
   if (isOutgoing) {
