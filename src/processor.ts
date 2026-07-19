@@ -6,8 +6,10 @@ import { withinLimits } from "./rate-limit.js";
 import { sendBusinessMessage } from "./telegram.js";
 import type { BusinessConnection, TelegramMessage, TelegramUpdate } from "./types.js";
 
-const audit = (event: string, connectionId?: string, chatId?: number, metadata: Record<string, unknown> = {}) =>
-  query("INSERT INTO audit_log(event, connection_id, chat_id, metadata) VALUES($1,$2,$3,$4)", [event, connectionId, chatId, JSON.stringify(metadata)]);
+const audit = async (event: string, connectionId?: string, chatId?: number, metadata: Record<string, unknown> = {}) => {
+  console.log(JSON.stringify({ level: "info", event, connectionId, chatId, ...metadata }));
+  await query("INSERT INTO audit_log(event, connection_id, chat_id, metadata) VALUES($1,$2,$3,$4)", [event, connectionId, chatId, JSON.stringify(metadata)]);
+};
 
 async function connection(update: BusinessConnection) {
   await query(`INSERT INTO business_connections(id,business_user_id,enabled,can_reply,updated_at)
