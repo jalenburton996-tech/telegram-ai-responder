@@ -40,7 +40,7 @@ services:
       - key: BUSINESS_HOURS
         value: 09:00-17:00,09:00-17:00,09:00-17:00,09:00-17:00,09:00-17:00,closed,closed
       - key: OUT_OF_HOURS_MODE
-        value: hold
+        value: reply
 
   - type: keyvalue
     name: telegram-ai-queue
