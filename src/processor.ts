@@ -3,7 +3,7 @@ import { query } from "./db.js";
 import { generateReply } from "./ai.js";
 import { isOpen, isUserAllowed } from "./rules.js";
 import { withinLimits } from "./rate-limit.js";
-import { sendBusinessMessage } from "./telegram.js";
+import { getBusinessConnection, sendBusinessMessage } from "./telegram.js";
 import type { BusinessConnection, TelegramMessage, TelegramUpdate } from "./types.js";
 
 const audit = async (event: string, connectionId?: string, chatId?: number, metadata: Record<string, unknown> = {}) => {
@@ -28,9 +28,21 @@ async function processMessage(message: TelegramMessage) {
   const senderId = message.from?.id;
   const body = message.text ?? message.caption;
   if (!connectionId || !senderId || !body) return;
-  const { rows } = await query<{ business_user_id: string; enabled: boolean; can_reply: boolean }>(
+  let { rows } = await query<{ business_user_id: string; enabled: boolean; can_reply: boolean }>(
     "SELECT business_user_id,enabled,can_reply FROM business_connections WHERE id=$1", [connectionId]);
-  const conn = rows[0];
+  let conn = rows[0];
+  if (!conn) {
+    try {
+      await connection(await getBusinessConnection(connectionId));
+      ({ rows } = await query<{ business_user_id: string; enabled: boolean; can_reply: boolean }>(
+        "SELECT business_user_id,enabled,can_reply FROM business_connections WHERE id=$1", [connectionId]));
+      conn = rows[0];
+    } catch (error) {
+      await audit("connection_recovery_failed", connectionId, message.chat.id, {
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  }
   if (!conn) return void await audit("connection_not_ready", connectionId, message.chat.id);
 
   const isOutgoing = String(senderId) === conn.business_user_id;

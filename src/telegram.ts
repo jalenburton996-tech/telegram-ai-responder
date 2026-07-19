@@ -1,4 +1,5 @@
 import { config } from "./config.js";
+import type { BusinessConnection } from "./types.js";
 
 const base = `https://api.telegram.org/bot${config.TELEGRAM_BOT_TOKEN}`;
 
@@ -16,5 +17,11 @@ export async function sendBusinessMessage(connectionId: string, chatId: number, 
   return telegram<{ message_id: number }>("sendMessage", {
     business_connection_id: connectionId, chat_id: chatId, text,
     link_preview_options: { is_disabled: true }
+  });
+}
+
+export async function getBusinessConnection(connectionId: string) {
+  return telegram<BusinessConnection>("getBusinessConnection", {
+    business_connection_id: connectionId
   });
 }
