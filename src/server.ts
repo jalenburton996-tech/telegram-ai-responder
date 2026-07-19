@@ -24,7 +24,7 @@ app.post<{ Body: TelegramUpdate }>("/webhooks/telegram", async (request, reply) 
   if (secret !== config.TELEGRAM_WEBHOOK_SECRET) return reply.code(401).send({ ok: false });
   const update = request.body;
   if (!Number.isSafeInteger(update?.update_id)) return reply.code(400).send({ ok: false });
-  await updatesQueue.add("update", update, { jobId: String(update.update_id), attempts: 5, backoff: { type: "exponential", delay: 1000 }, removeOnComplete: 1000, removeOnFail: 5000 });
+  await updatesQueue.add("update", update, { jobId: `telegram-${update.update_id}`, attempts: 5, backoff: { type: "exponential", delay: 1000 }, removeOnComplete: 1000, removeOnFail: 5000 });
   return { ok: true };
 });
 
