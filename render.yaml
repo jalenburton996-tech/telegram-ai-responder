@@ -1,0 +1,52 @@
+services:
+  - type: web
+    name: telegram-ai-responder
+    runtime: node
+    buildCommand: npm ci && npm run build
+    startCommand: node dist/src/migrate.js && npm start
+    healthCheckPath: /health/ready
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: telegram-ai-database
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: telegram-ai-queue
+          property: connectionString
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_WEBHOOK_SECRET
+        generateValue: true
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: BUSINESS_NAME
+        sync: false
+      - key: BUSINESS_CONTEXT
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-5.4-mini
+      - key: AUTO_CONFIGURE_WEBHOOK
+        value: true
+      - key: EMBEDDED_WORKER
+        value: true
+      - key: TIMEZONE
+        value: America/New_York
+      - key: BUSINESS_HOURS
+        value: 09:00-17:00,09:00-17:00,09:00-17:00,09:00-17:00,09:00-17:00,closed,closed
+      - key: OUT_OF_HOURS_MODE
+        value: hold
+
+  - type: keyvalue
+    name: telegram-ai-queue
+    ipAllowList: []
+    maxmemoryPolicy: noeviction
+
+databases:
+  - name: telegram-ai-database
+    databaseName: telegram_ai
+    ipAllowList: []

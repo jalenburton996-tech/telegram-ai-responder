@@ -1,0 +1,39 @@
+{
+  "name": "telegram-business-ai-responder",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "dev:worker": "tsx watch src/worker.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/src/server.js",
+    "worker": "node dist/src/worker.js",
+    "db:migrate": "tsx src/migrate.ts",
+    "setup:webhook": "tsx scripts/set-webhook.ts",
+    "check": "tsc --noEmit && eslint .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fastify/helmet": "^13.0.2",
+    "bullmq": "^5.58.5",
+    "dotenv": "^17.2.2",
+    "fastify": "^5.6.1",
+    "ioredis": "^5.7.0",
+    "luxon": "^3.7.2",
+    "openai": "^5.19.1",
+    "pg": "^8.16.3",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/luxon": "^3.7.1",
+    "@types/node": "^24.3.1",
+    "@types/pg": "^8.15.5",
+    "eslint": "^9.35.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.42.0",
+    "vitest": "^3.2.4"
+  }
+}
