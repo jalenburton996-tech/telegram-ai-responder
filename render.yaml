@@ -2,6 +2,7 @@ services:
   - type: web
     name: telegram-ai-responder
     runtime: node
+    plan: free
     buildCommand: npm ci && npm run build
     startCommand: node dist/src/migrate.js && npm start
     healthCheckPath: /health/ready
@@ -43,10 +44,12 @@ services:
 
   - type: keyvalue
     name: telegram-ai-queue
+    plan: free
     ipAllowList: []
     maxmemoryPolicy: noeviction
 
 databases:
   - name: telegram-ai-database
     databaseName: telegram_ai
+    plan: free
     ipAllowList: []
