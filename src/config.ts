@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { createHash } from "node:crypto";
 import { z } from "zod";
 
 const schema = z.object({
@@ -8,7 +9,7 @@ const schema = z.object({
   DATABASE_URL: z.string().min(1),
   REDIS_URL: z.string().min(1),
   TELEGRAM_BOT_TOKEN: z.string().min(10),
-  TELEGRAM_WEBHOOK_SECRET: z.string().min(32).regex(/^[A-Za-z0-9_-]+$/),
+  TELEGRAM_WEBHOOK_SECRET: z.string().min(32),
   PUBLIC_BASE_URL: z.string().url().transform((v) => v.replace(/\/$/, "")).optional(),
   RENDER_EXTERNAL_HOSTNAME: z.string().optional(),
   AUTO_CONFIGURE_WEBHOOK: z.string().default("false").transform((v) => v === "true"),
@@ -37,6 +38,7 @@ const schema = z.object({
 const parsed = schema.parse(process.env);
 export const config = {
   ...parsed,
+  TELEGRAM_WEBHOOK_SECRET: createHash("sha256").update(parsed.TELEGRAM_WEBHOOK_SECRET).digest("hex"),
   PUBLIC_BASE_URL: parsed.PUBLIC_BASE_URL ?? (parsed.RENDER_EXTERNAL_HOSTNAME ? `https://${parsed.RENDER_EXTERNAL_HOSTNAME}` : undefined)
 };
 export const parseIds = (value: string) => new Set(value.split(",").map((x) => x.trim()).filter(Boolean));
