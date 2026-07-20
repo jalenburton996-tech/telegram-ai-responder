@@ -81,7 +81,6 @@ async function processMessage(message: TelegramMessage) {
   const result = await generateReply(body, memory.rows.reverse());
   await sendAndRecord(connectionId, message.chat.id, result.text);
   if (result.handoff) {
-    await query("UPDATE chats SET takeover_until=now()+($3 || ' minutes')::interval WHERE connection_id=$1 AND chat_id=$2", [connectionId, message.chat.id, config.MANUAL_TAKEOVER_MINUTES]);
     await audit("ai_handoff", connectionId, message.chat.id);
   }
 }
