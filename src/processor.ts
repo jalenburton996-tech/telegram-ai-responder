@@ -47,6 +47,11 @@ async function processMessage(message: TelegramMessage) {
 
   const isOutgoing = String(senderId) === conn.business_user_id;
   if (isOutgoing) {
+    if (body.trim().toLowerCase() === "/ai") {
+      await query(`INSERT INTO chats(connection_id,chat_id,takeover_until,updated_at) VALUES($1,$2,now(),now())
+        ON CONFLICT(connection_id,chat_id) DO UPDATE SET takeover_until=now(),updated_at=now()`, [connectionId, message.chat.id]);
+      return void await audit("manual_takeover_ended", connectionId, message.chat.id);
+    }
     const ours = await query("SELECT 1 FROM messages WHERE connection_id=$1 AND chat_id=$2 AND telegram_message_id=$3 AND direction='ai'", [connectionId, message.chat.id, message.message_id]);
     if (ours.rowCount) return;
     await query(`INSERT INTO chats(connection_id,chat_id,takeover_until,updated_at) VALUES($1,$2,now()+($3 || ' minutes')::interval,now())
